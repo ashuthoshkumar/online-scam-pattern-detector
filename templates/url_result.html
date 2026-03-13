@@ -15,7 +15,9 @@
   <div class="nav-links">
     <a href="/" class="nav-link">Home</a>
     {% if session.get('user') %}
+      <span style="font-size:13px;color:var(--text2);padding:0 8px;">👤 {{ session.user.username }}</span>
       <a href="/dashboard" class="nav-btn-outline">Dashboard</a>
+      <a href="/logout" class="nav-btn-outline">Logout</a>
     {% else %}
       <a href="/login" class="nav-btn-outline">Login</a>
       <a href="/register" class="nav-btn-solid">Register</a>
@@ -26,28 +28,71 @@
 <div class="page">
   <a href="/" class="btn btn-secondary btn-sm mb-16" style="display:inline-flex;">← Back to Scanner</a>
  
-  {% set is_danger = result == 'DANGEROUS' or result == 'SCAM' %}
+  {% set is_danger = not is_safe %}
+ 
+  <!-- RESULT BOX -->
   <div class="result-box {{ 'result-scam' if is_danger else 'result-safe' }}">
     <div class="result-icon">{{ '🚨' if is_danger else '✅' }}</div>
-    <div class="result-title">{{ 'DANGEROUS URL' if is_danger else 'URL LOOKS SAFE' }}</div>
-    <p style="font-size:13px;color:var(--text3);margin-top:8px;">{{ result }}</p>
+    <div class="result-title">{{ 'DANGEROUS URL!' if is_danger else 'URL LOOKS SAFE' }}</div>
+    <div style="margin-top:10px;">
+      <span class="badge {{ 'badge-scam' if is_danger else 'badge-safe' }}" style="font-size:13px;padding:6px 16px;">
+        Risk Level: {{ result }}
+      </span>
+    </div>
+    {% if risk_score is defined and risk_score > 0 %}
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">Risk Score</div>
+      <div class="conf-bar-wrap" style="max-width:300px;margin:0 auto;">
+        <div class="conf-bar conf-bar-scam" style="width:{{ [risk_score * 10, 100] | min }}%;"></div>
+      </div>
+      <div style="font-size:22px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#fca5a5;margin-top:6px;">{{ risk_score }}/10</div>
+    </div>
+    {% endif %}
   </div>
  
+  <!-- SCANNED URL -->
   <div class="card mt-16">
     <div class="section-label">Scanned URL</div>
-    <p class="mono" style="font-size:13px;color:#93c5fd;background:rgba(255,255,255,0.03);padding:12px 14px;border-radius:8px;border:1px solid var(--border);word-break:break-all;">{{ url }}</p>
+    <p class="mono" style="font-size:13px;color:#93c5fd;background:rgba(255,255,255,0.03);padding:12px 14px;border-radius:8px;border:1px solid var(--border);word-break:break-all;">
+      {{ url }}
+    </p>
   </div>
  
+  <!-- FLAGS / ISSUES -->
   {% if flags %}
   <div class="card mt-16">
-    <div class="section-label">Risk Flags</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+    <div class="section-label">{{ '⚠️ Risk Factors Found' if is_danger else '✅ Analysis Details' }}</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
       {% for flag in flags %}
-        <span class="badge badge-scam">{{ flag }}</span>
+        <div style="padding:10px 14px;border-radius:8px;font-size:13.5px;
+          background:{{ 'rgba(239,68,68,0.07)' if is_danger else 'rgba(16,185,129,0.07)' }};
+          border:1px solid {{ 'rgba(239,68,68,0.2)' if is_danger else 'rgba(16,185,129,0.2)' }};
+          color:{{ '#fca5a5' if is_danger else '#6ee7b7' }};">
+          {{ flag }}
+        </div>
       {% endfor %}
     </div>
   </div>
   {% endif %}
+ 
+  <!-- ADVICE -->
+  <div class="card mt-16">
+    <div class="section-label">{{ '🚫 What to do' if is_danger else '💡 Safety Reminder' }}</div>
+    {% if is_danger %}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:13.5px;color:#fca5a5;">❌ Do NOT visit this URL</div>
+        <div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:13.5px;color:#fca5a5;">❌ Do NOT enter any personal info or passwords</div>
+        <div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:13.5px;color:#fca5a5;">❌ Do NOT make any payments on this site</div>
+        <div style="padding:10px 14px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:13.5px;color:#fca5a5;">✅ Report to Cyber Crime Helpline: <strong>1930</strong></div>
+      </div>
+    {% else %}
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <div style="padding:10px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:13.5px;color:#6ee7b7;">✅ URL appears safe based on our analysis</div>
+        <div style="padding:10px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:13.5px;color:#6ee7b7;">💡 Always verify the domain before entering sensitive info</div>
+        <div style="padding:10px 14px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);border-radius:8px;font-size:13.5px;color:#6ee7b7;">🔒 Look for HTTPS and padlock icon in browser</div>
+      </div>
+    {% endif %}
+  </div>
  
   <div style="display:flex;gap:12px;margin-top:20px;">
     <a href="/" class="btn btn-primary btn-lg" style="flex:1;">Scan Another URL</a>
@@ -67,6 +112,12 @@
   <div class="footer-left">© 2025 Scam Detector · CVR College of Engineering</div>
   <div class="footer-right"><a href="/" class="footer-link">Home</a></div>
 </footer>
-<script>setTimeout(()=>{ const b=document.getElementById('chat-bubble'); b.style.display='block'; setTimeout(()=>b.style.display='none',5000); },1500);</script>
+<script>
+  setTimeout(()=>{ const b=document.getElementById('chat-bubble'); b.style.display='block'; setTimeout(()=>b.style.display='none',5000); },1500);
+  document.addEventListener('DOMContentLoaded',()=>{
+    const bar=document.querySelector('.conf-bar');
+    if(bar){ const w=bar.style.width; bar.style.width='0'; setTimeout(()=>bar.style.width=w,200); }
+  });
+</script>
 </body>
 </html>

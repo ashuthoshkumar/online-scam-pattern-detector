@@ -188,8 +188,14 @@ def scan_url_route():
     if not url.startswith('http'):
         url = 'http://' + url
 
-    result = scan_url(url)
-    return render_template('url_result.html', result=result, user=user)
+    url_data = scan_url(url)
+    return render_template('url_result.html',
+                            result=url_data.get('risk_level', 'UNKNOWN'),
+                            is_safe=url_data.get('is_safe', True),
+                            risk_score=url_data.get('risk_score', 0),
+                            flags=url_data.get('issues', []),
+                            url=url,
+                            user=user)
 
 
 # ─── FILE UPLOAD ROUTE ───────────────────────────────────
