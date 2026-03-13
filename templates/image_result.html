@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Scan Result — Scam Detector</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <span class="nav-brand-text">Scam Detector</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Home</a>
+    {% if session.get('user') %}
+      <a href="/dashboard" class="nav-btn-outline">Dashboard</a>
+    {% else %}
+      <a href="/login" class="nav-btn-outline">Login</a>
+      <a href="/register" class="nav-btn-solid">Register</a>
+    {% endif %}
+  </div>
+</nav>
+ 
+<div class="page">
+  <a href="/" class="btn btn-secondary btn-sm mb-16" style="display:inline-flex;">← Back to Scanner</a>
+ 
+  {% set is_scam = result == 'SCAM' %}
+  <div class="result-box {{ 'result-scam' if is_scam else 'result-safe' }}">
+    <div class="result-icon">{{ '📸⚠️' if is_scam else '📸✅' }}</div>
+    <div class="result-title">{{ 'SCAM DETECTED IN IMAGE' if is_scam else 'IMAGE LOOKS SAFE' }}</div>
+    <div class="result-conf">Confidence: {{ confidence }}%</div>
+    <div class="conf-bar-wrap" style="max-width:300px;margin:12px auto 4px;">
+      <div class="conf-bar {{ 'conf-bar-scam' if is_scam else 'conf-bar-safe' }}" style="width:{{ confidence }}%;"></div>
+    </div>
+  </div>
+ 
+  {% if extracted_text %}
+  <div class="card mt-16">
+    <div class="section-label">Extracted Text (OCR)</div>
+    <p style="font-size:13.5px;color:var(--text2);line-height:1.7;background:rgba(255,255,255,0.03);padding:14px;border-radius:10px;border:1px solid var(--border);white-space:pre-wrap;">{{ extracted_text }}</p>
+  </div>
+  {% endif %}
+ 
+  <div style="display:flex;gap:12px;margin-top:20px;">
+    <a href="/" class="btn btn-primary btn-lg" style="flex:1;">Scan Another Image</a>
+    <a href="/chatbot" class="btn btn-secondary btn-lg">Ask AI Advisor</a>
+  </div>
+</div>
+ 
+<div id="chat-widget">
+  <div id="chat-bubble">Have questions about image scams?</div>
+  <a href="/chatbot" id="chat-toggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div class="chat-ping"></div>
+  </a>
+</div>
+ 
+<footer>
+  <div class="footer-left">© 2025 Scam Detector · CVR College of Engineering</div>
+  <div class="footer-right"><a href="/" class="footer-link">Home</a></div>
+</footer>
+<script>
+  setTimeout(()=>{ const b=document.getElementById('chat-bubble'); b.style.display='block'; setTimeout(()=>b.style.display='none',5000); },1500);
+  document.addEventListener('DOMContentLoaded',()=>{ const bar=document.querySelector('.conf-bar'); if(bar){ const w=bar.style.width; bar.style.width='0'; setTimeout(()=>bar.style.width=w,100); }});
+</script>
+</body>
+</html>

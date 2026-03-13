@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bulk Scan Results — Scam Detector</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <span class="nav-brand-text">Scam Detector</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Home</a>
+    {% if session.get('user') %}
+      <span style="font-size:13px;color:var(--text2);padding:0 8px;">👤 {{ session.user.username }}</span>
+      <a href="/dashboard" class="nav-btn-outline">Dashboard</a>
+      <a href="/logout" class="nav-btn-outline">Logout</a>
+    {% else %}
+      <a href="/login" class="nav-btn-outline">Login</a>
+      <a href="/register" class="nav-btn-solid">Register</a>
+    {% endif %}
+  </div>
+</nav>
+ 
+<div class="page page-lg">
+  <a href="/" class="btn btn-secondary btn-sm mb-16" style="display:inline-flex;">← Back to Scanner</a>
+  <h1 class="page-title">Bulk Scan Results</h1>
+  <p class="page-sub">{{ total }} messages analyzed from <span style="color:#93c5fd;">{{ filename }}</span></p>
+ 
+  <div class="stat-grid mb-24">
+    <div class="stat-card">
+      <div class="stat-num text-blue">{{ total }}</div>
+      <div class="stat-lbl">Total Scanned</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num text-red">{{ scam_count }}</div>
+      <div class="stat-lbl">Scams Detected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num text-green">{{ legit_count }}</div>
+      <div class="stat-lbl">Legitimate</div>
+    </div>
+  </div>
+ 
+  <div class="card">
+    <div class="section-label">All Results</div>
+    <div style="overflow-x:auto;">
+      <table class="sd-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Message</th>
+            <th>Result</th>
+            <th>Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in results %}
+          <tr>
+            <td class="mono text-muted">{{ loop.index }}</td>
+            <td style="max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);">
+              {{ item.message }}
+            </td>
+            <td>
+              <span class="badge {{ 'badge-scam' if item.result=='SCAM' else 'badge-safe' }}">
+                {{ '⚠️ SCAM' if item.result=='SCAM' else '✅ Safe' }}
+              </span>
+            </td>
+            <td class="mono" style="color:var(--text2);">{{ item.confidence }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+ 
+  <div style="margin-top:20px;">
+    <a href="/" class="btn btn-primary btn-lg">Scan More Messages</a>
+  </div>
+</div>
+ 
+<div id="chat-widget">
+  <div id="chat-bubble">Questions about these results?</div>
+  <a href="/chatbot" id="chat-toggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div class="chat-ping"></div>
+  </a>
+</div>
+ 
+<footer>
+  <div class="footer-left">© 2025 Scam Detector · CVR College of Engineering</div>
+  <div class="footer-right">
+    <a href="/" class="footer-link">Home</a>
+    <a href="/admin" class="footer-link">Admin</a>
+  </div>
+</footer>
+<script>setTimeout(()=>{ const b=document.getElementById('chat-bubble'); b.style.display='block'; setTimeout(()=>b.style.display='none',5000); },1500);</script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL Scan Result — Scam Detector</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-brand">
+    <div class="nav-logo"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <span class="nav-brand-text">Scam Detector</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Home</a>
+    {% if session.get('user') %}
+      <a href="/dashboard" class="nav-btn-outline">Dashboard</a>
+    {% else %}
+      <a href="/login" class="nav-btn-outline">Login</a>
+      <a href="/register" class="nav-btn-solid">Register</a>
+    {% endif %}
+  </div>
+</nav>
+ 
+<div class="page">
+  <a href="/" class="btn btn-secondary btn-sm mb-16" style="display:inline-flex;">← Back to Scanner</a>
+ 
+  {% set is_danger = result == 'DANGEROUS' or result == 'SCAM' %}
+  <div class="result-box {{ 'result-scam' if is_danger else 'result-safe' }}">
+    <div class="result-icon">{{ '🚨' if is_danger else '✅' }}</div>
+    <div class="result-title">{{ 'DANGEROUS URL' if is_danger else 'URL LOOKS SAFE' }}</div>
+    <p style="font-size:13px;color:var(--text3);margin-top:8px;">{{ result }}</p>
+  </div>
+ 
+  <div class="card mt-16">
+    <div class="section-label">Scanned URL</div>
+    <p class="mono" style="font-size:13px;color:#93c5fd;background:rgba(255,255,255,0.03);padding:12px 14px;border-radius:8px;border:1px solid var(--border);word-break:break-all;">{{ url }}</p>
+  </div>
+ 
+  {% if flags %}
+  <div class="card mt-16">
+    <div class="section-label">Risk Flags</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+      {% for flag in flags %}
+        <span class="badge badge-scam">{{ flag }}</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+ 
+  <div style="display:flex;gap:12px;margin-top:20px;">
+    <a href="/" class="btn btn-primary btn-lg" style="flex:1;">Scan Another URL</a>
+    <a href="/chatbot" class="btn btn-secondary btn-lg">Ask AI Advisor</a>
+  </div>
+</div>
+ 
+<div id="chat-widget">
+  <div id="chat-bubble">Want to know more about this URL?</div>
+  <a href="/chatbot" id="chat-toggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <div class="chat-ping"></div>
+  </a>
+</div>
+ 
+<footer>
+  <div class="footer-left">© 2025 Scam Detector · CVR College of Engineering</div>
+  <div class="footer-right"><a href="/" class="footer-link">Home</a></div>
+</footer>
+<script>setTimeout(()=>{ const b=document.getElementById('chat-bubble'); b.style.display='block'; setTimeout(()=>b.style.display='none',5000); },1500);</script>
+</body>
+</html>
