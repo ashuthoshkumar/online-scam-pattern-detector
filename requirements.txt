@@ -13,3 +13,4 @@ pillow
 pytesseract
 google-generativeai
 deep-translator
+langdetect
