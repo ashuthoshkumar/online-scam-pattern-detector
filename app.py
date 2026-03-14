@@ -14,7 +14,7 @@ from flask_cors import CORS
 import os
 import json
 import sqlite3
-import google.genai as genai
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.secret_key = 'scam_detector_secret_key'
