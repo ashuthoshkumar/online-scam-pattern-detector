@@ -10,7 +10,8 @@ matplotlib
 seaborn
 feedparser
 pillow
-pytesseract
 google-generativeai
 deep-translator
 langdetect
+easyocr
+torch

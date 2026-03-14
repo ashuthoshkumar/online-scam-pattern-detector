@@ -1,31 +1,29 @@
-import pytesseract
+import easyocr
+import numpy as np
 from PIL import Image
 import io
 
+# Initialize OCR reader
+reader = easyocr.Reader(['en'])
 
 def extract_text_from_image(image_file):
     try:
         # Open image
         image = Image.open(io.BytesIO(image_file.read()))
 
-        # Convert to RGB if needed
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
+        # Convert to numpy array
+        img_array = np.array(image)
 
-        # Extract text using OCR
-        extracted_text = pytesseract.image_to_string(
-            image,
-            lang='eng',
-            config='--psm 6'
-        )
+        # OCR detection
+        result = reader.readtext(img_array)
 
-        # Clean extracted text
-        cleaned = extracted_text.strip()
+        # Extract text
+        text = " ".join([r[1] for r in result])
 
-        if not cleaned:
-            return None, "No text found in image"
+        if text.strip() == "":
+            return None, "No text detected"
 
-        return cleaned, None
+        return text, None
 
     except Exception as e:
-        return None, f"Image processing error: {str(e)}"
+        return None, str(e)
