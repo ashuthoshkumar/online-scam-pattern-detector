@@ -13,5 +13,4 @@ pillow
 google-generativeai
 deep-translator
 langdetect
-easyocr
-torch
+pytesseract

@@ -1,29 +1,33 @@
-import easyocr
-import numpy as np
+import pytesseract
 from PIL import Image
 import io
 
-# Initialize OCR reader
-reader = easyocr.Reader(['en'])
+# Path to tesseract (Linux path for Render server)
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 def extract_text_from_image(image_file):
     try:
         # Open image
         image = Image.open(io.BytesIO(image_file.read()))
 
-        # Convert to numpy array
-        img_array = np.array(image)
+        # Convert to RGB if needed
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
 
-        # OCR detection
-        result = reader.readtext(img_array)
+        # Extract text using OCR
+        extracted_text = pytesseract.image_to_string(
+            image,
+            lang='eng',
+            config='--psm 6'
+        )
 
-        # Extract text
-        text = " ".join([r[1] for r in result])
+        # Clean extracted text
+        cleaned = extracted_text.strip()
 
-        if text.strip() == "":
-            return None, "No text detected"
+        if not cleaned:
+            return None, "No text found in image"
 
-        return text, None
+        return cleaned, None
 
     except Exception as e:
-        return None, str(e)
+        return None, f"Image processing error: {str(e)}"
