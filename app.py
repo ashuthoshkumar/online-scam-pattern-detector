@@ -580,7 +580,17 @@ def admin_logout():
     session.pop('admin', None)
     return redirect(url_for('admin_login'))
 
+@app.route('/favicon.ico')
+def favicon():
+    from flask import send_from_directory
+    return send_from_directory('static', 'favicon.ico')
+
+@app.route('/static/service-worker.js')
+def service_worker():
+    from flask import send_from_directory
+    return send_from_directory('static', 'service-worker.js',
+                               mimetype='application/javascript')
 
 # ─── RUN APP ─────────────────────────────────────────────
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

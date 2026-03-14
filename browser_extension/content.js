@@ -1,5 +1,33 @@
+
 // ── CONTENT SCRIPT ───────────────────────────────────────
 // Runs on every webpage and extracts text content
+
+// Trusted websites - never scan these
+const TRUSTED_SITES = [
+  'claude.ai',
+  'anthropic.com',
+  'google.com',
+  'youtube.com',
+  'facebook.com',
+  'instagram.com',
+  'twitter.com',
+  'linkedin.com',
+  'github.com',
+  'microsoft.com',
+  'amazon.com',
+  'flipkart.com',
+  'naukri.com',
+  'irctc.co.in',
+  '127.0.0.1',
+  'localhost'
+];
+
+// Stop immediately if trusted site
+const currentHost = window.location.hostname;
+if (TRUSTED_SITES.some(site => currentHost.includes(site))) {
+  // Don't scan this page
+  throw new Error('Trusted site - skipping scan');
+}
 
 function extractPageContent() {
     // Get page URL
