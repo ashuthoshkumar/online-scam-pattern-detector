@@ -1,24 +1,32 @@
-import pytesseract
-from PIL import Image
-import io
-
-pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
+import requests
 
 def extract_text_from_image(image_file):
     try:
-        image = Image.open(io.BytesIO(image_file.read()))
+        url = "https://api.ocr.space/parse/image"
 
-        if image.mode != "RGB":
-            image = image.convert("RGB")
+        files = {"file": image_file}
+        data = {
+            "apikey": "helloworld",  # free public API key
+            "language": "eng"
+        }
 
-        extracted_text = pytesseract.image_to_string(image)
+        response = requests.post(url, files=files, data=data)
+        result = response.json()
 
-        print("OCR TEXT:", extracted_text)   # DEBUG LINE
+        if result.get("IsErroredOnProcessing"):
+            return None, "OCR error"
 
-        if not extracted_text.strip():
-            return None, "No text found in image"
+        parsed = result.get("ParsedResults")
 
-        return extracted_text.strip(), None
+        if not parsed:
+            return None, "No text detected"
+
+        text = parsed[0]["ParsedText"].strip()
+
+        if text == "":
+            return None, "No text found"
+
+        return text, None
 
     except Exception as e:
         return None, str(e)
