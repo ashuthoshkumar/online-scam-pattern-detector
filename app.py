@@ -319,15 +319,15 @@ def scan_image():
         save_prediction(extracted_text, final_result, confidence)
 
     # Store result in session and redirect
-session['image_result'] = {
-    'extracted_text': extracted_text,
-    'result': final_result,
-    'confidence': confidence,
-    'patterns_found': patterns_found,
-    'detected_lang': detected_lang,
-    'translated_text': translated_text
-}
-return redirect('/image-result')
+    session['image_result'] = {
+        'extracted_text': extracted_text,
+        'result': final_result,
+        'confidence': confidence,
+        'patterns_found': patterns_found,
+        'detected_lang': detected_lang,
+        'translated_text': translated_text
+    }
+    return redirect('/image-result')
 
 @app.route('/image-result')
 def image_result():
