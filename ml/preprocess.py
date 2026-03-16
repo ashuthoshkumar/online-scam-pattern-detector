@@ -5,7 +5,6 @@ from nltk.stem import PorterStemmer
 from deep_translator import GoogleTranslator
 from langdetect import detect as detect_lang
 
-nltk.download('stopwords', quiet=True)
 
 stemmer = PorterStemmer()
 stop_words = set(stopwords.words('english'))
