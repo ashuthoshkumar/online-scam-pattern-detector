@@ -4,7 +4,14 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from deep_translator import GoogleTranslator
 from langdetect import detect as detect_lang
+import os
 
+# Download NLTK data on startup
+nltk_data_dir = os.path.join(os.path.expanduser('~'), 'nltk_data')
+os.makedirs(nltk_data_dir, exist_ok=True)
+nltk.download('stopwords', quiet=True)
+nltk.download('punkt', quiet=True)
+nltk.download('wordnet', quiet=True)
 
 stemmer = PorterStemmer()
 stop_words = set(stopwords.words('english'))
