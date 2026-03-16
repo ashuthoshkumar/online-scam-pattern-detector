@@ -318,14 +318,30 @@ def scan_image():
     else:
         save_prediction(extracted_text, final_result, confidence)
 
+    # Store result in session and redirect
+session['image_result'] = {
+    'extracted_text': extracted_text,
+    'result': final_result,
+    'confidence': confidence,
+    'patterns_found': patterns_found,
+    'detected_lang': detected_lang,
+    'translated_text': translated_text
+}
+return redirect('/image-result')
+
+@app.route('/image-result')
+def image_result():
+    data = session.get('image_result')
+    if not data:
+        return redirect('/')
     return render_template('image_result.html',
-                           extracted_text=extracted_text,
-                           result=final_result,
-                           confidence=confidence,
-                           patterns_found=patterns_found,
-                           detected_lang=detected_lang,
-                           translated_text=translated_text,
-                           user=user)
+                           extracted_text=data['extracted_text'],
+                           result=data['result'],
+                           confidence=data['confidence'],
+                           patterns_found=data['patterns_found'],
+                           detected_lang=data['detected_lang'],
+                           translated_text=data['translated_text'],
+                           user=session.get('user'))
 
 # ─── CHATBOT PAGE ────────────────────────────────────────
 @app.route('/chatbot')

@@ -857,16 +857,24 @@
     method: 'POST',
     body: formData
   })
-  .then(res => res.text())
+  .then(res => {
+    if (res.redirected) {
+      window.location.href = res.url;  // follow redirect
+      return;
+    }
+    return res.text();
+  })
   .then(html => {
-    document.open();
-    document.write(html);
-    document.close();
+    if (!html) return;
+    // Instead of document.write, navigate properly
+    const blob = new Blob([html], {type: 'text/html'});
+    const url = URL.createObjectURL(blob);
+    window.location.href = url;
   })
   .catch(err => {
     btn.textContent = 'Upload Image';
     btn.disabled = false;
-    alert('Something went wrong. Try again!');
+    alert('Something went wrong: ' + err);
   });
 }
 </script>
