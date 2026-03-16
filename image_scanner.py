@@ -1,4 +1,5 @@
 import requests
+import os
 
 def extract_text_from_image(image_file):
     try:
@@ -6,7 +7,7 @@ def extract_text_from_image(image_file):
 
         files = {"file": image_file}
         data = {
-            "apikey": "helloworld",  # free public API key
+            "apikey": os.environ.get("OCR_API_KEY", "helloworld"),  
             "language": "eng"
         }
 

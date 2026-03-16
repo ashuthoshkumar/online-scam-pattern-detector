@@ -714,8 +714,8 @@
     </div>
     <div class="feat-title">Image / Screenshot Scanner</div>
     <div class="feat-desc" style="margin-bottom:14px;">Upload a screenshot of any suspicious message or website to detect scam content instantly.</div>
-    <form action="/scan-image" method="POST" enctype="multipart/form-data">
-      <input type="file" name="image" accept="image/*" style="display:none" id="img-upload" onchange="this.form.submit()">
+    <form id="img-form" action="/scan-image" method="POST" enctype="multipart/form-data">
+      <input type="file" name="image" accept="image/*" style="display:none" id="img-upload" onchange="uploadImage()">
       <button type="button" onclick="document.getElementById('img-upload').click()" style="width:100%;padding:9px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.07);color:#10b981;font-family:'Sora',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;">
         Upload Image
       </button>
@@ -842,6 +842,33 @@
       .then(() => console.log('PWA ready!'))
       .catch(e => console.log('SW error:', e));
   }
+  function uploadImage() {
+  const file = document.getElementById('img-upload').files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const btn = document.querySelector('#img-form button');
+  btn.textContent = 'Scanning...';
+  btn.disabled = true;
+
+  fetch('/scan-image', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.text())
+  .then(html => {
+    document.open();
+    document.write(html);
+    document.close();
+  })
+  .catch(err => {
+    btn.textContent = 'Upload Image';
+    btn.disabled = false;
+    alert('Something went wrong. Try again!');
+  });
+}
 </script>
  
 </body>
