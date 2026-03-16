@@ -20,10 +20,12 @@ app = Flask(__name__)
 app.secret_key = 'scam_detector_secret_key'
 CORS(app)
 
-GEMINI_API_KEY = "AIzaSyAXKymcQo8rKJEz4FM1ohD0xRlL5CVN_TI"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=GEMINI_API_KEY)
 
 # Initialize database when app starts
-init_db()
+with app.app_context():
+    init_db()
 
 
 # ─── HOME PAGE ───────────────────────────────────────────
