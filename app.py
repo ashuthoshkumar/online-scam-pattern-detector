@@ -162,7 +162,7 @@ def predict():
             # We ONLY call it here inside a thread. No synchronous calls!
             email_thread = threading.Thread(
                 target=send_scam_alert, 
-                args=(message, confidence, user['email'])
+                args=(user['email'], user['username'], message, confidence)
             )
             email_thread.daemon = True 
             email_thread.start()
