@@ -157,7 +157,7 @@ def predict():
         save_prediction(message, final_result, confidence)
 
     # 3. Background Email Sending (FIXED)
-    if final_result == 'SCAM' and user and user.get('email'):
+    if final_result == 'SCAM':
         try:
             # We ONLY call it here inside a thread. No synchronous calls!
             email_thread = threading.Thread(
