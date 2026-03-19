@@ -18,8 +18,11 @@ else:
 def predict_message(text):
     # REMOVED: No more 'with open' inside the function!
 
-    # 1. Translate to English first
-    translated_text, detected_lang = translate_to_english(text)
+    if text.isascii():
+        translated_text = text
+        detected_lang = "English"
+    else:
+        translated_text, detected_lang = translate_to_english(text)
 
     # 2. Preprocess
     cleaned = preprocess_text(translated_text)
