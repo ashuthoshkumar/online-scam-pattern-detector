@@ -26,9 +26,6 @@ CORS(app)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Initialize database when app starts
-with app.app_context():
-    init_db()
 
 
 # ─── HOME PAGE ───────────────────────────────────────────
@@ -660,6 +657,12 @@ def export_csv():
 
 # ─── RUN APP ─────────────────────────────────────────────
 if __name__ == '__main__':
-    # Render provides a 'PORT' environment variable. If it's missing, use 5000.
+    # Move database init here so it only runs once and doesn't block Gunicorn
+    try:
+        init_db() 
+        print("Database initialized successfully!")
+    except Exception as e:
+        print(f"Database skip/error: {e}")
+
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

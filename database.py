@@ -232,3 +232,13 @@ def get_user_stats(user_id):
         "scam": scam_count,
         "legitimate": legit_count
     }
+def update_schema():
+    conn = get_db_connection()
+    try:
+        # Example: adding a confidence column if it doesn't exist
+        conn.execute('ALTER TABLE predictions ADD COLUMN confidence REAL')
+        conn.commit()
+    except sqlite3.OperationalError:
+        # This catches the "duplicate column" error and lets the app continue
+        pass 
+    conn.close()
