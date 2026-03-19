@@ -58,10 +58,10 @@ def get_all_predictions(limit=50):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM predictions 
-        ORDER BY datetime(timestamp) DESC 
-        LIMIT ?
-    """, (limit,))
+    SELECT * FROM predictions 
+    ORDER BY datetime(timestamp) DESC, id DESC
+    LIMIT ?
+""", (limit,))
 
     rows = cursor.fetchall()
     conn.close()
@@ -204,7 +204,7 @@ def get_user_predictions(user_id):
         SELECT id, message, result, confidence, timestamp 
         FROM predictions 
         WHERE user_id = ? 
-        ORDER BY datetime(timestamp) DESC
+        ORDER BY datetime(timestamp) DESC, id DESC
     """, (user_id,))
 
     rows = cursor.fetchall()
