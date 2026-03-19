@@ -56,8 +56,13 @@ def save_prediction(message, result, confidence):
 def get_all_predictions(limit=50):
     conn = sqlite3.connect('scam_detector.db')
     cursor = conn.cursor()
-    # Adding "LIMIT" ensures the dashboard stays fast as your data grows
-    cursor.execute("SELECT * FROM predictions ORDER BY timestamp DESC LIMIT ?", (limit,))
+
+    cursor.execute("""
+        SELECT * FROM predictions 
+        ORDER BY datetime(timestamp) DESC 
+        LIMIT ?
+    """, (limit,))
+
     rows = cursor.fetchall()
     conn.close()
     return rows
@@ -194,13 +199,14 @@ def save_user_prediction(user_id, message, result, confidence):
 def get_user_predictions(user_id):
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute(
-        """SELECT id, message, result, confidence, timestamp 
-           FROM predictions 
-           WHERE user_id = ? 
-           ORDER BY timestamp DESC""",
-        (user_id,)
-    )
+
+    cursor.execute("""
+        SELECT id, message, result, confidence, timestamp 
+        FROM predictions 
+        WHERE user_id = ? 
+        ORDER BY datetime(timestamp) DESC
+    """, (user_id,))
+
     rows = cursor.fetchall()
     conn.close()
     return rows
