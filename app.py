@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, Response
 from ml.predict import predict_message
 from database import (init_db, save_prediction, get_all_predictions,
                       get_stats, verify_admin, get_daily_stats,
@@ -15,6 +15,8 @@ import os
 import json
 import sqlite3
 import google.generativeai as genai
+import csv
+import io
 
 app = Flask(__name__)
 app.secret_key = 'scam_detector_secret_key'
@@ -166,8 +168,23 @@ def predict():
     else:
         save_prediction(message, final_result, confidence)
 
+    # List of common scam triggers to highlight
+    scam_keywords = [
+        'bank', 'frozen', 'unusual activity', 'verify', 'identity', 'immediately',
+        'link', 'otp', 'pin', 'password', 'lottery', 'won', 'prize', 'claim',
+        'urgent', 'suspension', 'kyc', 'update', 'blocked', 'gift card', 'winner'
+    ]
+
+    highlighted_message = message
+    if final_result == 'SCAM':
+        import re
+        for word in scam_keywords:
+            # Use regex for case-insensitive replacement
+            pattern = re.compile(re.escape(word), re.IGNORECASE)
+            highlighted_message = pattern.sub(f'<span class="highlight-trigger">{word}</span>', highlighted_message)
+
     return render_template('result.html',
-                           message=message,
+                           message=highlighted_message, # Use the highlighted version
                            result=final_result,
                            confidence=confidence,
                            patterns_found=patterns_found,
@@ -569,9 +586,15 @@ def admin_dashboard():
     trend_data = get_trend_data()
     news = get_scam_news(max_articles=10)
 
+    # FIX: Sort daily_stats by date (index 0) ascending
+    daily_stats = sorted(daily_stats, key=lambda x: x[0])
+    
     dates = [row[0] for row in daily_stats]
     scam_counts = [row[2] for row in daily_stats]
     legit_counts = [row[3] for row in daily_stats]
+
+    # FIX: Sort trend_data by date (index 0) ascending
+    trend_data = sorted(trend_data, key=lambda x: x[0])
 
     trend_dates = [row[0] for row in trend_data]
     trend_scams = [row[1] for row in trend_data]
@@ -608,6 +631,33 @@ def service_worker():
     from flask import send_from_directory
     return send_from_directory('static', 'service-worker.js',
                                mimetype='application/javascript')
+
+@app.route('/admin/export')
+def export_csv():
+    if not session.get('admin'):
+        return redirect(url_for('admin_login'))
+
+    predictions = get_all_predictions()
+    
+    # Create an in-memory string buffer
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Add Header Row
+    writer.writerow(['ID', 'Message', 'Result', 'Confidence (%)', 'Timestamp'])
+    
+    # Add Data Rows
+    for row in predictions:
+        # Extract columns based on your DB schema (id, msg, res, conf, time)
+        writer.writerow([row[0], row[1], row[2], f"{row[3]}%", row[4]])
+    
+    output.seek(0)
+    
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=scam_records.csv"}
+    )
 
 # ─── RUN APP ─────────────────────────────────────────────
 if __name__ == '__main__':

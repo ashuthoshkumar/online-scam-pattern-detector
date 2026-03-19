@@ -151,38 +151,80 @@
  
   <!-- ALL PREDICTIONS TABLE -->
   <div class="card">
-    <div class="section-label">All Scan Records</div>
-    <div style="overflow-x:auto;">
-      <table class="sd-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Message</th>
-            <th>Result</th>
-            <th>Confidence</th>
-            <th>Timestamp</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in predictions %}
-          <tr>
-            <td class="mono text-muted">{{ row[0] }}</td>
-            <td style="max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);">{{ row[1] }}</td>
-            <td>
-              <span class="badge {{ 'badge-scam' if row[2]=='SCAM' else 'badge-safe' }}">
-                {{ '⚠️ SCAM' if row[2]=='SCAM' else '✅ Safe' }}
-              </span>
-            </td>
-            <td class="mono">{{ row[3] }}%</td>
-            <td class="text-muted" style="font-size:12px;">{{ row[4] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+    <div class="section-label" style="margin-bottom: 0;">All Scan Records</div>
+    <a href="/admin/export" class="btn-export">
+      📥 Export CSV
+    </a>
   </div>
+
+  <div style="overflow-x:auto;">
+    <table class="sd-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Message</th>
+          <th>Result</th>
+          <th>Confidence</th>
+          <th>Timestamp</th>
+          <th>Action</th> </tr>
+      </thead>
+      <tbody>
+        {% for row in predictions %}
+        <tr>
+          <td class="mono text-muted">{{ row[0] }}</td>
+          <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text2);">
+            {{ row[1] }}
+          </td>
+          <td>
+            <span class="badge {{ 'badge-scam' if row[2]=='SCAM' else 'badge-safe' }}">
+              {{ '⚠️ SCAM' if row[2]=='SCAM' else '✅ Safe' }}
+            </span>
+          </td>
+          <td class="mono">{{ row[3] }}%</td>
+          <td class="text-muted" style="font-size:12px;">{{ row[4] }}</td>
+          <td>
+  <button class="btn-view" 
+          onclick='const msg = {{ row[1]|tojson|safe }}; alert("Message ID #{{ row[0] }}:\n\n" + msg)'>
+    View
+  </button>
+</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  /* Style for the Export Button */
+  .btn-export {
+    background: #10b981; 
+    color: white; 
+    padding: 6px 12px; 
+    border-radius: 6px; 
+    text-decoration: none; 
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+  .btn-export:hover { background: #059669; }
+
+  /* Style for the View Button */
+  .btn-view {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+  }
+  .btn-view:hover { background: var(--primary); color: white; }
+</style>
  
-</div><!-- end page -->
+</div>
+<!-- end page -->
  
 <footer>
   <div class="footer-left">© 2025 Scam Detector · CVR College of Engineering</div>

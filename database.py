@@ -14,7 +14,8 @@ def init_db():
             message TEXT NOT NULL,
             result TEXT NOT NULL,
             confidence REAL NOT NULL,
-            timestamp TEXT NOT NULL
+            timestamp TEXT NOT NULL,
+            user_id INTEGER DEFAULT NULL
         )
     ''')
 
@@ -55,8 +56,9 @@ def save_prediction(message, result, confidence):
 def get_all_predictions():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
+    # Sorting by ID DESC ensures the newest scan (highest ID) is always first
     cursor.execute(
-        "SELECT * FROM predictions ORDER BY timestamp DESC"
+        "SELECT * FROM predictions ORDER BY id DESC"
     )
     rows = cursor.fetchall()
     conn.close()
@@ -105,7 +107,7 @@ def get_daily_stats():
                SUM(CASE WHEN result = 'LEGITIMATE' THEN 1 ELSE 0 END) as legit
         FROM predictions
         GROUP BY DATE(timestamp)
-        ORDER BY date DESC
+        ORDER BY date ASC
         LIMIT 7
     ''')
     rows = cursor.fetchall()

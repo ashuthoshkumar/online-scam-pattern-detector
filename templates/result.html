@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scan Result — Scam Detector</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<style>
+.highlight-trigger {
+    background: rgba(239, 68, 68, 0.2); /* Subtle red background */
+    border-bottom: 2px solid #ef4444;    /* Sharp red underline */
+    color: #fca5a5;                      /* Light red text */
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+</style>
 </head>
 <body>
 <nav>
@@ -43,7 +53,7 @@
  
   <div class="card mt-16">
     <div class="section-label">Analyzed Message</div>
-    <p style="font-size:14px;color:var(--text2);line-height:1.7;background:rgba(255,255,255,0.03);padding:14px;border-radius:10px;border:1px solid var(--border);">{{ message }}</p>
+    <p style="font-size:14px;color:var(--text2);line-height:1.7;background:rgba(255,255,255,0.03);padding:14px;border-radius:10px;border:1px solid var(--border);">{{ message | safe }}</p>
   </div>
  
   {% if patterns %}
