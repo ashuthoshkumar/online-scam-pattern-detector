@@ -1,35 +1,42 @@
 import pickle
+import os
 from ml.preprocess import preprocess_text, translate_to_english
 
-def predict_message(text):
-    # Load model and vectorizer
-    with open('ml/model.pkl', 'rb') as f:
-        model = pickle.load(f)
-    with open('ml/vectorizer.pkl', 'rb') as f:
-        vectorizer = pickle.load(f)
+# --- LOAD MODELS ONCE AT STARTUP ---
+# This stays in RAM so predictions become nearly instant
+MODEL_PATH = 'ml/model.pkl'
+VECTOR_PATH = 'ml/vectorizer.pkl'
 
-    # Translate to English first
+if os.path.exists(MODEL_PATH) and os.path.exists(VECTOR_PATH):
+    with open(MODEL_PATH, 'rb') as f:
+        model = pickle.load(f)
+    with open(VECTOR_PATH, 'rb') as f:
+        vectorizer = pickle.load(f)
+else:
+    print("⚠️ Warning: Model files not found! Ensure paths are correct.")
+
+def predict_message(text):
+    # REMOVED: No more 'with open' inside the function!
+
+    # 1. Translate to English first
     translated_text, detected_lang = translate_to_english(text)
 
-    # Preprocess and predict
+    # 2. Preprocess
     cleaned = preprocess_text(translated_text)
+    
+    # 3. Predict using the globally loaded model
     vectorized = vectorizer.transform([cleaned])
     prediction = model.predict(vectorized)[0]
     probability = model.predict_proba(vectorized)[0]
 
     confidence = round(max(probability) * 100, 2)
 
-    if prediction == 1:
-        return {
-            "result": "SCAM",
-            "confidence": confidence,
-            "detected_lang": detected_lang,
-            "translated_text": translated_text
-        }
-    else:
-        return {
-            "result": "LEGITIMATE",
-            "confidence": confidence,
-            "detected_lang": detected_lang,
-            "translated_text": translated_text
-        }
+    # 4. Return results
+    status = "SCAM" if prediction == 1 else "LEGITIMATE"
+    
+    return {
+        "result": status,
+        "confidence": confidence,
+        "detected_lang": detected_lang,
+        "translated_text": translated_text
+    }
