@@ -660,5 +660,6 @@ def export_csv():
 
 # ─── RUN APP ─────────────────────────────────────────────
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=5000)
+    # Render provides a 'PORT' environment variable. If it's missing, use 5000.
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
