@@ -134,17 +134,12 @@ def predict():
     user = session.get('user')
 
     if not message.strip():
-        return render_template('index.html',
-                               error="Please enter a message!",
-                               user=user)
+        return render_template('index.html', error="Please enter a message!", user=user)
 
-    # Check regex patterns first
+    # 1. Logic Processing
     pattern_result = check_patterns(message)
-
-    # Get ML prediction
     ml_result = predict_message(message)
 
-    # If either regex OR ML says scam, mark as scam
     if pattern_result['is_scam'] or ml_result['result'] == 'SCAM':
         final_result = 'SCAM'
     else:
@@ -155,21 +150,26 @@ def predict():
     detected_lang = ml_result.get('detected_lang', 'English')
     translated_text = ml_result.get('translated_text', message)
 
-    # Save to database and send alert if needed
+    # 2. Database Saving
     if user:
         save_user_prediction(user['id'], message, final_result, confidence)
-        # Send email alert if scam detected
-        if final_result == 'SCAM':
-            send_scam_alert(
-                to_email=user['email'],
-                username=user['username'],
-                message=message,
-                confidence=confidence
-            )
     else:
         save_prediction(message, final_result, confidence)
 
-    # List of common scam triggers to highlight
+    # 3. Background Email Sending (FIXED)
+    if final_result == 'SCAM' and user and user.get('email'):
+        try:
+            # We ONLY call it here inside a thread. No synchronous calls!
+            email_thread = threading.Thread(
+                target=send_scam_alert, 
+                args=(message, confidence, user['email'])
+            )
+            email_thread.daemon = True 
+            email_thread.start()
+        except Exception as e:
+            print(f"❌ Email Thread Error: {e}")
+
+    # 4. Keyword Highlighting
     scam_keywords = [
         'bank', 'frozen', 'unusual activity', 'verify', 'identity', 'immediately',
         'link', 'otp', 'pin', 'password', 'lottery', 'won', 'prize', 'claim',
@@ -178,32 +178,19 @@ def predict():
 
     highlighted_message = message
     if final_result == 'SCAM':
-    # Get the email from the session or the form
-        recipient_email = session.get('user', {}).get('email')
-    
-        if recipient_email:
-        # We use a comma at the end of the tuple to make it valid
-            email_thread = threading.Thread(
-                target=send_scam_alert, 
-                args=(message, confidence, recipient_email)
-            )
-            email_thread.daemon = True  # This ensures the thread dies if the app stops
-            email_thread.start()
         import re
         for word in scam_keywords:
-            # Use regex for case-insensitive replacement
             pattern = re.compile(re.escape(word), re.IGNORECASE)
             highlighted_message = pattern.sub(f'<span class="highlight-trigger">{word}</span>', highlighted_message)
 
     return render_template('result.html',
-                           message=highlighted_message, # Use the highlighted version
+                           message=highlighted_message,
                            result=final_result,
                            confidence=confidence,
                            patterns_found=patterns_found,
                            detected_lang=detected_lang,
                            translated_text=translated_text,
                            user=user)
-
 
 # ─── URL SCANNER ROUTE ───────────────────────────────────
 @app.route('/scan-url', methods=['POST'])
