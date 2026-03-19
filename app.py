@@ -17,6 +17,7 @@ import sqlite3
 import google.generativeai as genai
 import csv
 import io
+import threading
 
 app = Flask(__name__)
 app.secret_key = 'scam_detector_secret_key'
@@ -177,6 +178,17 @@ def predict():
 
     highlighted_message = message
     if final_result == 'SCAM':
+    # Get the email from the session or the form
+        recipient_email = session.get('user', {}).get('email')
+    
+        if recipient_email:
+        # We use a comma at the end of the tuple to make it valid
+            email_thread = threading.Thread(
+                target=send_scam_alert, 
+                args=(message, confidence, recipient_email)
+            )
+            email_thread.daemon = True  # This ensures the thread dies if the app stops
+            email_thread.start()
         import re
         for word in scam_keywords:
             # Use regex for case-insensitive replacement
